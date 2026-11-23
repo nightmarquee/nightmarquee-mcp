@@ -21,7 +21,7 @@ first time it needs it. The same steps, with buttons, are on
 ## Install
 
 - **Claude**: Settings, then Connectors, add a custom connector, paste the address.
-- **ChatGPT**: turn on developer mode in settings, add a new connector, paste the address. Developer mode is not offered on every account.
+- **ChatGPT**: open chatgpt.com/plugins, choose the plus button, then Add custom MCP server. Paste the address, choose OAuth or no authentication, create it, then install it. Not every ChatGPT account can add one.
 - **Cursor**: use the Add to Cursor button on <https://nightmarquee.com/mcp>, then confirm in Cursor.
 - **VS Code**: use the Add to VS Code button on <https://nightmarquee.com/mcp>, check the server details, then install.
 - **Claude Code**: `claude mcp add --transport http nightmarquee https://mcp.nightmarquee.com/mcp`, or as a plugin, which adds the remote server plus the skills below: `/plugin install nightmarquee --marketplace nightmarquee/nightmarquee-mcp`

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.9 (2026-11-23)
+
+- The README gives ChatGPT's current steps: open chatgpt.com/plugins, add a custom MCP server, choose OAuth or no authentication, then install it. Developer mode is no longer needed.
+- The README and the manifest name the package's new home, `nightmarquee/nightmarquee-mcp`, for the plugin, the skills and support, and the README lists the plugin under Claude Code's remote install.
+- The code and the routes it calls are unchanged.
+
 ## 0.1.8 (2026-11-13)
 
 - Listings point at the remote server, `https://mcp.nightmarquee.com/mcp`, and name this package as the older way. The registry entry gains the remote address next to the npm package, and the package's repository link is the public one, `ant-dev-lab/nightmarquee-mcp`.
