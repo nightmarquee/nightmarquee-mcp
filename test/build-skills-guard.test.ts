@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, writeFil
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { AI_LOOK, buildSkills, checkOutDir, main, readServedSlugs } from "../scripts/build-skills.mjs";
+import { AI_LOOK, buildSkills, checkOutDir, main, readServedSlugs, syncRepoSkills } from "../scripts/build-skills.mjs";
 import { inMainRepo, pkgRoot, repoRoot } from "./main-repo";
 
 const catalog = {
@@ -131,5 +131,60 @@ describe("build-skills out dir guard", () => {
       }
       expect(readFileSync(join(dir, "skills", "nightmarquee-glasshouse-nine", "SKILL.md"), "utf8")).toBe("kept");
     }
+  });
+});
+
+/**
+ * A checkout of the main repo as the drop release sees it: the builder at its place, a served.json naming one
+ * design whose pack key still matches, and one retired skill folder.
+ */
+function releaseTree(): string {
+  const dir = tempDir();
+  const put = (path: string, text: string) => {
+    mkdirSync(join(dir, path, ".."), { recursive: true });
+    writeFileSync(join(dir, path), text);
+  };
+  put("packages/nightmarquee-mcp/scripts/build-skills.mjs", "// the builder\n");
+  put("packages/nightmarquee-mcp/skills/nightmarquee-retired/SKILL.md", "old");
+  put("packages/nightmarquee-mcp/README.md", "readme");
+  put("src/lib/registry/item.ts", "export const REGISTRY_MAPPING_VERSION = 3;\n");
+  put("src/lib/registry/served.json", JSON.stringify({ mappingVersion: 3, items: { "glasshouse-nine": "source/glasshouse-nine/a.json" } }));
+  put("src/lib/source/packs.json", JSON.stringify({ "glasshouse-nine": { key: "source/glasshouse-nine/a.json" } }));
+  return dir;
+}
+
+describe("syncRepoSkills, the drop release's writer", () => {
+  it("writes the skills into the tree's package with that tree's served designs, and removes retired folders", () => {
+    const dir = releaseTree();
+    const result = syncRepoSkills(dir, catalog);
+
+    const out = join(dir, "packages", "nightmarquee-mcp");
+    const expected = buildSkills(catalog, AI_LOOK, ["glasshouse-nine"]);
+    for (const { path, content } of expected) expect(readFileSync(join(out, path), "utf8"), path).toBe(content);
+    expect(readFileSync(join(out, "skills", "nightmarquee-glasshouse-nine", "SKILL.md"), "utf8")).toContain("npx shadcn@latest add @nightmarquee/glasshouse-nine");
+    expect(existsSync(join(out, "skills", "nightmarquee-retired"))).toBe(false);
+    expect(readFileSync(join(out, "README.md"), "utf8")).toBe("readme");
+    expect(result).toEqual({ deleted: ["nightmarquee-retired"], written: expected.length });
+  });
+
+  it("leaves the shadcn line out when the tree's served.json no longer matches the pack", () => {
+    const dir = releaseTree();
+    writeFileSync(join(dir, "src/lib/source/packs.json"), JSON.stringify({ "glasshouse-nine": { key: "source/glasshouse-nine/b.json" } }));
+    syncRepoSkills(dir, catalog);
+    expect(readFileSync(join(dir, "packages/nightmarquee-mcp/skills/nightmarquee-glasshouse-nine/SKILL.md"), "utf8")).not.toContain("npx shadcn@latest add");
+  });
+
+  it("refuses a folder that is not a checkout of the main repo", () => {
+    const dir = tempDir();
+    mkdirSync(join(dir, "packages", "nightmarquee-mcp", "skills", "keep"), { recursive: true });
+    writeFileSync(join(dir, "packages", "nightmarquee-mcp", "skills", "keep", "SKILL.md"), "kept");
+    expect(() => syncRepoSkills(dir, catalog)).toThrow(/not a checkout of the main repo/);
+    expect(readFileSync(join(dir, "packages", "nightmarquee-mcp", "skills", "keep", "SKILL.md"), "utf8")).toBe("kept");
+  });
+
+  it("refuses a catalog with no free designs before deleting anything", () => {
+    const dir = releaseTree();
+    expect(() => syncRepoSkills(dir, { ...catalog, prompts: [] })).toThrow(/no free designs/);
+    expect(readFileSync(join(dir, "packages/nightmarquee-mcp/skills/nightmarquee-retired/SKILL.md"), "utf8")).toBe("old");
   });
 });
