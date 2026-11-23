@@ -1,6 +1,6 @@
 ---
 name: "nightmarquee"
-description: "Build cinematic, art-directed websites and apps from NightMarquee designs: 87 builds (ecommerce, landing, portfolio, saas, hero, 3d, mobile, dashboard), each with a live demo, a build prompt, a runnable starter for many, and the footage the demos play. Use when someone asks for a cinematic landing page, a hero section, a scroll-driven video site, a 3D or WebGL page, or a page like a NightMarquee demo."
+description: "Build cinematic, art-directed websites and apps from NightMarquee designs: 90 builds (landing, ecommerce, portfolio, saas, hero, 3d, mobile, dashboard), each with a live demo, a build prompt, a runnable starter for many, and the footage the demos play. Use when someone asks for a cinematic landing page, a hero section, a scroll-driven video site, a 3D or WebGL page, or a page like a NightMarquee demo."
 ---
 
 # NightMarquee

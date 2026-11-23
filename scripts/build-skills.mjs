@@ -518,10 +518,15 @@ const PKG_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
  * served.json recorded for it.
  */
 export function readServedSlugs(repoRoot = resolve(PKG_ROOT, "..", "..")) {
+  if (resolve(repoRoot, "packages", "nightmarquee-mcp") !== PKG_ROOT) return [];
+  return servedSlugsIn(repoRoot);
+}
+
+/** readServedSlugs for any checkout of the main repo, not only the one this script sits in. */
+export function servedSlugsIn(repoRoot) {
   const servedFile = join(repoRoot, "src", "lib", "registry", "served.json");
   const itemFile = join(repoRoot, "src", "lib", "registry", "item.ts");
   const packsFile = join(repoRoot, "src", "lib", "source", "packs.json");
-  if (resolve(repoRoot, "packages", "nightmarquee-mcp") !== PKG_ROOT) return [];
   if (!existsSync(servedFile) || !existsSync(itemFile) || !existsSync(packsFile)) return [];
   const served = JSON.parse(readFileSync(servedFile, "utf8"));
   const version = readFileSync(itemFile, "utf8").match(/export const REGISTRY_MAPPING_VERSION\s*=\s*(\d+)/);
@@ -567,33 +572,63 @@ function parseArgs(argv) {
   return { dryRun: flags.length > 0, out: resolve(dirs[0] ?? PKG_ROOT) };
 }
 
+/** An empty or broken catalog would delete every per-design skill folder, so it stops the build before any write. */
+function checkCatalog(catalog) {
+  const free = Array.isArray(catalog?.prompts) ? catalog.prompts.filter((p) => p.tier === "free").length : 0;
+  if (free === 0) throw new Error("the catalog lists no free designs; refusing to write skills or delete any folder");
+}
+
+/** The skill folders under <out>/skills that `skills` no longer lists. */
+function staleFolders(out, skills) {
+  const keep = new Set(skills.map((s) => s.path.split("/")[1]));
+  const dir = join(out, "skills");
+  return existsSync(dir) ? readdirSync(dir).filter((name) => !keep.has(name)) : [];
+}
+
+/** Removes the stale folders and writes every skill under <out>. Callers check the out dir first. */
+function writeSkills(out, skills) {
+  const deleted = staleFolders(out, skills);
+  mkdirSync(join(out, "skills"), { recursive: true });
+  for (const name of deleted) rmSync(join(out, "skills", name), { recursive: true });
+  for (const { path, content } of skills) {
+    mkdirSync(dirname(join(out, path)), { recursive: true });
+    writeFileSync(join(out, path), content);
+  }
+  return { deleted, written: skills.length };
+}
+
+/**
+ * The drop release's writer: the skills for `catalog`, written into packages/nightmarquee-mcp of the checkout at
+ * `repoRoot` (the release's own working tree, on main), with that tree's served designs. Like checkOutDir, it writes
+ * only where the tree is a checkout of the main repo, told by the builder at its place.
+ */
+export function syncRepoSkills(repoRoot, catalog) {
+  const out = join(resolve(repoRoot), "packages", "nightmarquee-mcp");
+  if (!existsSync(join(out, "scripts", "build-skills.mjs"))) {
+    throw new Error(`${resolve(repoRoot)} is not a checkout of the main repo (no packages/nightmarquee-mcp/scripts/build-skills.mjs); refusing to write skills there`);
+  }
+  checkCatalog(catalog);
+  return writeSkills(out, buildSkills(catalog, AI_LOOK, servedSlugsIn(repoRoot)));
+}
+
 export async function main(argv = process.argv.slice(2), fetchImpl = fetch, servedSlugs = readServedSlugs()) {
   const { dryRun, out } = parseArgs(argv);
   checkOutDir(out);
   const res = await fetchImpl(`${process.env.NIGHTMARQUEE_API ?? SITE}/api/mcp/catalog`);
   if (!res.ok) throw new Error(`catalog fetch failed: ${res.status}`);
   const catalog = await res.json();
-  // An empty or broken answer would delete every per-design skill folder, so it stops the build here.
-  const free = Array.isArray(catalog?.prompts) ? catalog.prompts.filter((p) => p.tier === "free").length : 0;
-  if (free === 0) throw new Error("the catalog lists no free designs; refusing to write skills or delete any folder");
+  checkCatalog(catalog);
   const skills = buildSkills(catalog, AI_LOOK, servedSlugs);
 
-  const keep = new Set(skills.map((s) => s.path.split("/")[1]));
-  const dir = join(out, "skills");
-  const stale = existsSync(dir) ? readdirSync(dir).filter((name) => !keep.has(name)) : [];
   if (dryRun) {
+    const stale = staleFolders(out, skills);
     for (const name of stale) console.log(`would delete skills/${name}/`);
     for (const { path } of skills) console.log(`would write ${path}`);
-    console.log(`dry run: ${stale.length} folders to delete, ${skills.length} files to write in ${dir}`);
+    console.log(`dry run: ${stale.length} folders to delete, ${skills.length} files to write in ${join(out, "skills")}`);
     return;
   }
-  mkdirSync(dir, { recursive: true });
-  for (const name of stale) rmSync(join(dir, name), { recursive: true });
-  for (const { path, content } of skills) {
-    mkdirSync(dirname(join(out, path)), { recursive: true });
-    writeFileSync(join(out, path), content);
-  }
-  console.log(`wrote ${skills.length} files to ${dir}`);
+  writeSkills(out, skills);
+  console.log(`wrote ${skills.length} files to ${join(out, "skills")}`);
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
