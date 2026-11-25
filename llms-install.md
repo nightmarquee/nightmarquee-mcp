@@ -38,4 +38,4 @@ Use the older local package instead (Node.js 20 or newer):
 }
 ```
 
-Its tools have different names; the README lists them under "The older way".
+Its tools have different names; the README lists them under "The older way: this npm package".

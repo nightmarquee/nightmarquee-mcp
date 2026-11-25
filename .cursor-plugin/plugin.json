@@ -1,7 +1,7 @@
 {
   "name": "nightmarquee",
-  "version": "0.1.9",
-  "description": "Cinematic website designs with build prompts and starters, plus a check for AI-look problems. Add one address to Claude, ChatGPT, Cursor, VS Code, Claude Code or Codex. Search designs, read build prompts, get starter projects and check a site. Some designs and tools ask you to sign in. Your tool opens the sign-in the first time it needs it.",
+  "version": "0.1.11",
+  "description": "Ask the Cursor agent for a landing page or hero section and it finds a cinematic design, fetches the build prompt written for Cursor and downloads a runnable starter where one exists. You can also check any public site for AI-look problems and get fixes to paste. Search and free designs need no account; footage, starters and the site check need a free account, and the other designs need a plan. Cursor opens the sign-in the first time it is needed.",
   "author": {
     "name": "NightMarquee",
     "email": "support@nightmarquee.com",
@@ -14,10 +14,14 @@
     "mcp",
     "design",
     "website",
+    "landing-page",
+    "hero-section",
+    "animation",
+    "nextjs",
+    "starter",
     "prompts",
     "frontend",
-    "landing-page",
-    "animation"
+    "design-review"
   ],
   "logo": "./icon.png",
   "mcpServers": "./.cursor-plugin/mcp.json"
