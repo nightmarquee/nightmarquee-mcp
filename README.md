@@ -1,10 +1,12 @@
-# nightmarquee
+# NightMarquee
 
-Cinematic website prompts with live demos, inside your editor.
+Cinematic, animated website designs for AI coding tools: live demos, build
+prompts, runnable starter projects and a check for AI-look problems, the signs
+that a page was made by AI.
 
-Art-directed prompts for hero sections, landing pages, SaaS, portfolio,
-e-commerce and 3D/WebGL scenes. Each is tuned for Lovable, Bolt, Cursor,
-Claude and Codex, and each has a live demo you can scroll.
+Designs for hero sections, landing pages, SaaS, portfolios, online shops and
+3D/WebGL scenes. Each build prompt is written for Lovable, Bolt, Cursor, Claude
+or Codex, and each design has a live demo you can scroll.
 
 NightMarquee is a remote MCP (Model Context Protocol) server. Add one address
 to your AI tool, and search designs, get build prompts and starters, and check
@@ -21,17 +23,40 @@ first time it needs it. The same steps, with buttons, are on
 ## Install
 
 - **Claude**: Settings, then Connectors, add a custom connector, paste the address.
-- **ChatGPT**: open chatgpt.com/plugins, choose the plus button, then Add custom MCP server. Paste the address, choose OAuth or no authentication, create it, then install it. Not every ChatGPT account can add one.
+- **ChatGPT**: open chatgpt.com/plugins, choose the plus button, then Add custom MCP server. Paste the address, name it NightMarquee, add our icon (<https://nightmarquee.com/brand/nightmarquee-256.png>), choose OAuth or no authentication, create it, then install it. ChatGPT shows only the name and icon you enter. Not every ChatGPT account can add one.
 - **Cursor**: use the Add to Cursor button on <https://nightmarquee.com/mcp>, then confirm in Cursor.
 - **VS Code**: use the Add to VS Code button on <https://nightmarquee.com/mcp>, check the server details, then install.
 - **Claude Code**: `claude mcp add --transport http nightmarquee https://mcp.nightmarquee.com/mcp`, or as a plugin, which adds the remote server plus the skills below: `/plugin install nightmarquee --marketplace nightmarquee/nightmarquee-mcp`
 - **Codex**: `codex mcp add nightmarquee --url https://mcp.nightmarquee.com/mcp`
-- **Any other tool**: paste the address where it asks for a remote MCP server. It uses the streamable HTTP transport and signs you in with OAuth.
+- **Any other tool**: paste the address where it asks for a remote MCP server. It uses the streamable HTTP transport and signs you in with OAuth. In a JSON config:
+
+```json
+{ "mcpServers": { "nightmarquee": { "url": "https://mcp.nightmarquee.com/mcp" } } }
+```
+
+## Tools
+
+The remote server at `https://mcp.nightmarquee.com/mcp` has these tools:
+
+- `search_designs`: list designs by words, category, or free and paid, each with a poster, a short preview and a live demo link
+- `get_design`: one design's build prompt for your coding tool, its live demo and whether a starter exists; pass a brand name to have the prompt use it
+- `get_footage`: short-lived download links for the clips and images a design's demo uses
+- `get_starter`: a short-lived link to the design's runnable Next.js starter project, with the steps to run it
+- `open_in_studio`: a link to the design's page on nightmarquee.com, where you can make your own version of its footage
+- `list_scenes`: the scenes your account has finished on nightmarquee.com
+- `get_account`: your plan, credit balance and what is left today
+- `check_site`: start NightMarquee's AI-look check of a public website
+- `get_job`: read a check's result: the score and each problem with its fix
+
+Search and free designs need no account. Footage, starters and the site check
+need a free account, and the other designs need a plan. Your AI tool opens the
+sign-in the first time it is needed. Recent versions of Claude Code also load the
+skills below straight from the server.
 
 ## The older way: this npm package
 
 This package is the earlier way: a local stdio server (Node 20 or newer) with
-the tools listed under Use below. It still works. Pick it if your tool cannot
+its own tools, listed below. The tool names differ from the remote server's. It still works. Pick it if your tool cannot
 add a remote address.
 
 **Claude Code**
@@ -76,9 +101,9 @@ Codex uses the tools but does not show MCP prompts as commands yet, so ask for
 a design in plain language and it calls `nightmarquee_search_prompts`. Prompts
 come back in the Codex dialect unless you pass another `tool`.
 
-No account needed. Free prompts work immediately.
+The package needs no account for free prompts.
 
-## Use
+### Tools of the local package only
 
 - `nightmarquee_search_prompts`: browse by `query`, `category` or `tier`
 - `nightmarquee_get_prompt`: fetch one by `slug`, optionally with your own
@@ -89,13 +114,13 @@ No account needed. Free prompts work immediately.
 - `nightmarquee_sign_in`: connect an account, so the prompts that come with a plan open
 - `nightmarquee_whoami`: check what's connected
 
-Categories are `hero`, `landing`, `saas`, `portfolio`, `ecommerce`, `3d`, `mobile` and `dashboard`.
+`category` takes a slug such as `hero`, `landing` or `3d`.
 
 Ask for a design in plain language and the model will usually reach for
 `nightmarquee_search_prompts` on its own. Or drive it directly:
 
 ```
-nightmarquee_get_prompt(slug: "glasshouse-nine", tool: "cursor", brand: "Northwind")
+nightmarquee_get_prompt(slug: "<slug from search>", tool: "cursor", brand: "<your brand>")
 ```
 
 Every prompt in the catalog is also registered as an MCP prompt, so the whole
@@ -103,7 +128,7 @@ library shows up in your client's command palette. In Claude Code that means a
 slash command per design:
 
 ```
-/mcp__nightmarquee__glasshouse-nine
+/mcp__nightmarquee__<slug>
 ```
 
 Other clients surface MCP prompts their own way. Claude Desktop lists them in
@@ -112,20 +137,19 @@ startup, so if the server can't reach nightmarquee.com when your editor
 launches, the tools still work but the per-prompt commands won't appear until
 you restart.
 
-## Footage
+### Footage in the local package
 
 Most demos play video. When your account may download it, `nightmarquee_get_prompt`
 returns the footage from the demo, every clip, with a signed link per file, and
 the prompt text ends with a note naming each clip. The agent downloads the files
 into `public/` under their names and then builds, so the page you get plays the
-same footage as the demo. The links last 10 minutes; `nightmarquee_get_footage`
+same footage as the demo. The links are short-lived; `nightmarquee_get_footage`
 fetches fresh ones without the prompt.
 
 A free prompt's footage needs a free account, and the rest come with any
 plan. Without an account, the prompt text still arrives in full, with one
 line saying how many clips the demo plays and that `nightmarquee_sign_in` gets
-them. Each account can fetch 30 packs an hour, shared with downloads on the
-site.
+them. Downloads are rate-limited per account, shared with the site.
 
 In Lovable and Bolt, download the files from the prompt page on
 nightmarquee.com and upload them there.
@@ -144,16 +168,19 @@ prompt text: each fetches the current prompt through the remote server,
 `https://mcp.nightmarquee.com/mcp`, when it is connected, and otherwise asks
 you to copy it from the design's page on nightmarquee.com.
 
+The remote server also serves the same skills over MCP. Recent versions of
+Claude Code load them by themselves once the server is added, named after the
+server, so there is nothing else to install there.
+
 ## Plans
 
-Some prompts are free, currently `glasshouse-nine`, `aetheris-voyage`,
-`nordlys-fintech`, `solstice-festival`, `lumen-observatory`, `sumi-atelier`,
-`wren` and `fieldnote`. The rest come with
-[any plan](https://nightmarquee.com/pricing?ref=mcp). Run
-`nightmarquee_search_prompts` with `tier: "free"` for the live list.
+Some designs are free and the rest come with
+[any plan](https://nightmarquee.com/pricing?ref=mcp). For the live list of free
+ones, ask the remote server's `search_designs` for free designs, or run this
+package's `nightmarquee_search_prompts` with `tier: "free"`.
 
-Run `nightmarquee_sign_in` and approve the code in your browser. It waits about
-a minute; if you took longer, run it again and it picks up the same request
+Run `nightmarquee_sign_in` and approve the code in your browser. It waits a short
+while; if you took longer, run it again and it picks up the same request
 rather than issuing a new code. Either way the rest unlock in the same session,
 no restart. Fetching a locked prompt without an entitlement returns a
 teaser and a pricing link, never the body.
@@ -208,7 +235,7 @@ On top of that, each request carries three headers by default:
 - `x-nm-install`: a random UUID generated on your machine on first run and
   kept in `credentials.json`. Not derived from anything, tied to nothing else.
 - `x-nm-client`: the name and version your MCP client reports, e.g.
-  `claude-code/2.1.240`. In Codex this package also asks for the Codex dialect
+  `claude-code/<version>`. In Codex this package also asks for the Codex dialect
   itself, so turning telemetry off does not change which prompt text you get.
 - `x-nm-version`: the version of this package.
 
@@ -235,8 +262,8 @@ setting.
 
 Your data is not sold, rented, or shared with third parties for their own
 purposes. It is processed only by the infrastructure providers running the
-service on our behalf: Vercel (hosting), Supabase (database), and Lemon Squeezy
-(payments, for subscribers only). No advertising or analytics networks receive
+service on our behalf: Vercel (hosting), Supabase (database), and our payment
+provider (for purchases only). No advertising or analytics networks receive
 any of it.
 
 ### Retention
