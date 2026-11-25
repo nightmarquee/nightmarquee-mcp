@@ -74,7 +74,7 @@ function guide(catalog) {
   const categories = [...new Set(catalog.prompts.map((p) => p.category))].join(", ");
   return skill(
     "nightmarquee",
-    `Build cinematic, art-directed websites and apps from NightMarquee designs: ${catalog.prompts.length} builds (${categories}), each with a live demo, a build prompt, a runnable starter for many, and the footage the demos play. Use when someone asks for a cinematic landing page, a hero section, a scroll-driven video site, a 3D or WebGL page, or a page like a NightMarquee demo.`,
+    `Build cinematic, art-directed websites and apps from NightMarquee designs (${categories}), each with a live demo, a build prompt, a runnable starter for many, and the footage the demos play. Use when someone asks for a cinematic landing page, a hero section, a scroll-driven video site, a 3D or WebGL page, or a page like a NightMarquee demo.`,
     `
 # NightMarquee
 
