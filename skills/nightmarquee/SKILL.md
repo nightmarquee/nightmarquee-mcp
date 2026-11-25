@@ -1,6 +1,6 @@
 ---
 name: "nightmarquee"
-description: "Build cinematic, art-directed websites and apps from NightMarquee designs: 91 builds (3d, landing, ecommerce, portfolio, saas, hero, mobile, dashboard), each with a live demo, a build prompt, a runnable starter for many, and the footage the demos play. Use when someone asks for a cinematic landing page, a hero section, a scroll-driven video site, a 3D or WebGL page, or a page like a NightMarquee demo."
+description: "Build cinematic, art-directed websites and apps from NightMarquee designs: 92 builds (3d, landing, ecommerce, portfolio, saas, hero, mobile, dashboard), each with a live demo, a build prompt, a runnable starter for many, and the footage the demos play. Use when someone asks for a cinematic landing page, a hero section, a scroll-driven video site, a 3D or WebGL page, or a page like a NightMarquee demo."
 ---
 
 # NightMarquee
@@ -76,4 +76,4 @@ Free designs need no account. Starters and footage need a connected account, and
 
 ## Without the MCP server
 
-Free designs are open on their pages: ask the person to open https://nightmarquee.com/p/<slug>, choose their tool and copy the prompt. The page loads it in the browser, so fetching the page will not show it. The free ones today: `roll-call`, `ninety-seconds`, `side-eye`, `echo-cave`, `jacquard-hall`, `snail-courier`, `lathe-lacquer`, `leaf-assay`, `ternary-systems`, `fieldnote`, `sumi-atelier`, `wren`, `glasshouse-nine`, `aetheris-voyage`, `nordlys-fintech`, `solstice-festival`, `lumen-observatory`. A signed-in person can also download starters and footage on the design's page.
+Free designs are open on their pages: ask the person to open https://nightmarquee.com/p/<slug>, choose their tool and copy the prompt. The page loads it in the browser, so fetching the page will not show it. The free ones today: `twist-stop`, `roll-call`, `ninety-seconds`, `side-eye`, `echo-cave`, `jacquard-hall`, `snail-courier`, `lathe-lacquer`, `leaf-assay`, `ternary-systems`, `fieldnote`, `sumi-atelier`, `wren`, `glasshouse-nine`, `aetheris-voyage`, `nordlys-fintech`, `solstice-festival`, `lumen-observatory`. A signed-in person can also download starters and footage on the design's page.
